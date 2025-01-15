@@ -7,15 +7,18 @@ import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import EmailIcon from '@mui/icons-material/Email';
+import ScaleLoader from 'react-spinners/ScaleLoader';
 
 const CreateEvent = () => {
+
+    const [loading, setLoading] = useState(false);
 
     const [isOpen, setIsOpen] = useState(false);
     const [allUsers, setAllUsers] = useState([]);
 
     const navigate = useNavigate();
 
-        //participant email
+    //participant email
     const [participantEmail, setParticipantEmail] = useState('');
 
 
@@ -48,10 +51,10 @@ const CreateEvent = () => {
             }
             else {
                 toast.info("Token Expired, Redirecting to Login Page");
-                setTimeout(()=>{
+                setTimeout(() => {
                     navigate('/');
-                },4000)
-                
+                }, 4000)
+
             }
 
         }
@@ -67,7 +70,7 @@ const CreateEvent = () => {
     const createEvent = async (e) => {
         e.preventDefault();
         try {
-
+            setLoading(true);
             if (invitedPeople.length <= 0) {
                 toast.error('Atleast One Participants should be added');
                 return;
@@ -95,14 +98,17 @@ const CreateEvent = () => {
             }
             else {
                 toast.infp("Token Expired, Redirecting to Login Page");
-                setTimeout(() =>{
-                    navigate('/');  
-                },4000)
+                setTimeout(() => {
+                    navigate('/');
+                }, 4000)
             }
         }
 
         catch (error) {
             console.log(error);
+        }
+        finally {
+            setLoading(false);
         }
 
         setFormData('');
@@ -112,23 +118,23 @@ const CreateEvent = () => {
 
     //handling external participants
 
-    const handleExternalParticipants = (email) =>{
+    const handleExternalParticipants = (email) => {
 
-        if(!email){
+        if (!email) {
             toast.error('Write a valid email');
         }
 
-        if(invitedPeople.includes(email)){
+        if (invitedPeople.includes(email)) {
             toast.error("Participant is already added");
             return;
         }
 
-        setInvitedPeople((prev) => [...prev,email]);
+        setInvitedPeople((prev) => [...prev, email]);
         setParticipantEmail('');
         toast.success('Added');
-        
 
-    } 
+
+    }
 
     //handling invited people change
     const handleChange = (e) => {
@@ -174,8 +180,15 @@ const CreateEvent = () => {
     return (
         <div className='w-full h-dvh flex flex-row items-center justify-evenly my-10'>
 
-            {/*Event Creation Form */}
-            <div className='min-w-[500px] h-auto mt-10'>
+            {loading ? 
+            
+            <div className='w-full h-full flex flex-col items-center justify-center '>
+                <ScaleLoader width={5} height={98} color='black' loading={loading} size={400} aria-label='Loading...'/>
+                <h1 className='text-lg text-slate-600 font-poppins'>Loading..</h1>
+                </div> 
+            
+            
+            : <div className='w-full h-dvh flex flex-row items-center justify-evenly my-10'><div className='min-w-[500px] h-auto mt-10'>
                 <form onSubmit={(e) => createEvent(e)} className='w-full h-full flex flex-col items-center justify-center gap-10 border-2 border-gray-300 p-7 rounded-lg hover:shadow-blue-300 hover:shadow-lg'>
                     <h1 className='font-merriweather text-3xl text-gray-600 font-semibold flex flex-row gap-2'><EditCalendarIcon fontSize='large' />Create Event</h1>
                     <div className='w-full flex flex-col gap-1'>
@@ -199,7 +212,7 @@ const CreateEvent = () => {
 
 
 
-                        <Drawer open={isOpen} className='overflow-auto'  onClose={toggle} direction="right" lockBackgroundScroll={true} size={500}>
+                        <Drawer open={isOpen} className='overflow-auto' onClose={toggle} direction="right" lockBackgroundScroll={true} size={500}>
                             <div className='w-full h-auto flex flex-col items-center py-5'>
                                 <h1 className='text-2xl rounded-md font-poppins text-white bg-blue-600 p-2'>Invite People</h1>
                                 <hr className='border-1 w-full bg-black my-5' />
@@ -216,7 +229,7 @@ const CreateEvent = () => {
                                     />
                                     <button
                                         type="button" // Prevents form submission
-                                        onClick={() =>handleExternalParticipants(participantEmail)}
+                                        onClick={() => handleExternalParticipants(participantEmail)}
                                         className="h-full w-1/5 bg-blue-600 text-white hover:opacity-90"
                                     >
                                         Add
@@ -265,7 +278,10 @@ const CreateEvent = () => {
 
 
 
-            <ToastContainer/>
+            <ToastContainer /></div> }
+
+            {/*Event Creation Form */}
+            
         </div>
     )
 }

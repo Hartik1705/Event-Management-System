@@ -34,7 +34,7 @@ function App() {
           <Route path='/events/:id' element={<EventDetails />} />
           <Route path='/createEvent' element={<CreateEvent />} />
           <Route path='/previousEvents' element={<PreviousEvents />} />
-          <Route path='/updateEvent' element={<UpdateEvent />}  />
+          <Route path='/updateEvent/:id' element={<UpdateEvent />}  />
         </Route>
 
 

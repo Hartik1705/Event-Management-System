@@ -1,5 +1,7 @@
 import eventModel from "../model/eventModel.js";
 import participantModel from "../model/participantModel.js";
+import userModel from "../model/userModel.js";
+import sendEventEmail from "../utils/email.js";
 
 
 //CREATE EVENT
@@ -7,10 +9,16 @@ const createEvent = async(req,res) =>{
 
     try {
         const createdBy = req._id;
+        // console.log("createdBy", createdBy);    
         // console.log("this is user's id from middleware", req._id);
         // console.log(req.body);
-         const {formData, invitedPeople} = req.body;
 
+        const user = await userModel.findOne({_id : req._id});
+        console.log("User",user);
+
+
+         const {formData, invitedPeople} = req.body;
+        console.log("invitedPeople", invitedPeople);
          const {eventName, description, eventTime} = formData;
 
         let invitedArr = [];
@@ -38,8 +46,12 @@ const createEvent = async(req,res) =>{
             email : invitedArr, invitedEvent : newEvent._id
         })
 
-      
         await participantsForEvent.save();
+
+        await sendEventEmail(user.email,invitedPeople, formData);
+
+        // console.log(emailSent);
+
         // console.log("..........");
         return res.json({message : true , event : newEvent, participants : participantsForEvent});
     } 
@@ -81,7 +93,9 @@ const updateEvent = async(req,res) =>{
     //we need _id of user
 
     //we need eventID --> we get eventDetails, participants
-    
+
+    try{
+            
     const userID = req._id;
 
     const {eventID, eventName, description, eventTime, invitedParticipants} = req.body;
@@ -90,25 +104,32 @@ const updateEvent = async(req,res) =>{
 
     const participantsInEvent = await participantModel.findOne({invitedEvent : eventID}).populate("invitedEvent");
 
-    const prev_part = participantsInEvent.email;
-
-    let  total = prev_part.concat(invitedParticipants)
-
-    console.log(event);
-
 
     event.eventName = eventName;
     event.description = description;
     event.eventTime = eventTime;
 
-     participantsInEvent.email = total;
+     participantsInEvent.email = invitedParticipants;
 
 
     await event.save();
 
     await participantsInEvent.save();
 
-    return res.json({success : true, updatedEvent : event, participantsInEvent, prev_part});
+    const formData = {
+        eventName,
+        description,
+        eventTime
+    }
+    await sendEventEmail(invitedParticipants, formData );
+
+    return res.json({success : true, updatedEvent : event, participantsInEvent});
+    }
+
+    catch(error){
+        return res.json({success : false, message : error.message});
+    }
+
 
 }
 

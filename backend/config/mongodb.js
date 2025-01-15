@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const connectDB = async()=>{
 
+    // const mongoURL = "mongodb+srv://luharhartik2002:Acerv3574g@e-commerce.wjv4z.mongodb.net/EventManagement";
     const mongoURL = process.env.MONGO_URL;
 
     try{
