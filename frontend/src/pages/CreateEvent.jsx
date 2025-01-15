@@ -11,6 +11,12 @@ import ScaleLoader from 'react-spinners/ScaleLoader';
 
 const CreateEvent = () => {
 
+
+        let currentDate = new Date();
+
+        let min_date = currentDate.getFullYear() + "-" + currentDate.getMonth() + 1 + "-" + currentDate.getDate();
+        console.log("min_date",min_date);
+
     const [loading, setLoading] = useState(false);
 
     const [isOpen, setIsOpen] = useState(false);
@@ -203,7 +209,7 @@ const CreateEvent = () => {
 
                     <div className='w-full flex flex-col gap-1'>
                         <label className='text-sm font-merriweather text-slate-700'>Event Date :  </label>
-                        <input required type="date" value={formData.eventTime} onChange={(e) => handleFormInput(e)} name="eventTime" className='p-2 border-2  border-gray-300 outline-slate-500' placeholder='YYYY-MM-DD' />
+                        <input required type="date" min={min_date} value={formData.eventTime} onChange={(e) => handleFormInput(e)} name="eventTime" className='p-2 border-2  border-gray-300 outline-slate-500' placeholder='YYYY-MM-DD' />
                     </div>
 
                     <div className='text-md flex flex-row w-full items-center justify-center gap-5 bg-slate-50 p-2 rounded-lg'>

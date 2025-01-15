@@ -3,6 +3,8 @@ import axios from 'axios';
 import { redirect, useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import DeleteIcon from '@mui/icons-material/Delete';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+
 
 const EventDetails = () => {
 
@@ -124,7 +126,7 @@ const EventDetails = () => {
                         <DeleteIcon className='mx-1'/>Delete Event
                     </button>
 
-                    <button className='border-2 border-blue-600 text-gray-700 hover:bg-blue-600  hover:text-white p-2 w-full mt-5 rounded-lg font-poppins transition duration-300' onClick={() => navigate(`/updateEvent/${id}`)} >Update Event</button>
+                    <button className=' border-2 border-blue-600 text-blue-700 hover:bg-blue-600  hover:text-white p-2 w-full mt-5 rounded-lg font-poppins transition duration-300' onClick={() => navigate(`/updateEvent/${id}`)} ><UpgradeIcon fontSize='medium'/>Update Event</button>
                     </div>
                 )}
             </div>

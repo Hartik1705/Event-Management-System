@@ -9,6 +9,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 
 const UpdateEvent = () => {
+
+
   const [isOpen, setIsOpen] = useState(false);
 
   const { id } = useParams();
