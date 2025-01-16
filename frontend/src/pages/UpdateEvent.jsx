@@ -7,24 +7,28 @@ import 'react-modern-drawer/dist/index.css';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
+import ScaleLoader from 'react-spinners/ScaleLoader';
 
 const UpdateEvent = () => {
 
 
   const [isOpen, setIsOpen] = useState(false);
-
+  const [loading , setLoading] = useState(false);
   const { id } = useParams();
+  console.log("Update event id", id);
 
   const navigate = useNavigate();
   //new Data
   const [allUsers, setAllUsers] = useState([]);
-  const [newParticipants, setNewParticipants] = useState([]);
-
 
   //external participants
 
   const [extParticipant, setExtParticipants] = useState([]);
 
+
+  const currentDate = new Date();
+
+  const min_date = currentDate.getFullYear() + "-" + currentDate.getMonth() + 1 + "-" + currentDate.getDate(); 
 
 
 
@@ -78,13 +82,18 @@ const updateEvent = async(e) =>{
 
   e.preventDefault();
   try{
+    if(previousParticipants.length === 0){
+      toast.error('Atleast one participant should be added');
+      return;
+    }
+    setLoading(true);
     const token  = localStorage.getItem('token');
-    const response = await axios.post(`http://localhost:3000/event/updateEvent`, {
-    eventID : id, invitedParticipants: previousParticipants, 
+    const response = await axios.post(`http://localhost:3000/event/updateEvent/${id}`, {
+     invitedParticipants: previousParticipants, 
     eventName : previousData.eventName,
     description : previousData.description,
     eventTime : previousData.eventTime}, {
-      headers : {
+      headers : { 
         Authorization : `Bearer ${token}`
       }
     })
@@ -92,19 +101,17 @@ const updateEvent = async(e) =>{
     console.log(response.data);
     const {success} = response.data;
 
-    if(success){
         toast.success('Event Updated!');
         setTimeout(()=>{
           navigate('/home');
         }, 2000)
-    }
-    else{
-      console.log()
-    }
 
   }
   catch(error){
       toast.err(error);
+  }
+  finally{
+    setLoading(false);
   }
 
 }
@@ -182,7 +189,14 @@ const updateEvent = async(e) =>{
 
   return (
     <div className="w-full h-dvh flex flex-row justify-around items-center my-10">
-      <form onSubmit={(e) =>updateEvent(e)} className="rounded-lg font-poppins border-2 border-slate-300 hover:shadow-md hover:shadow-blue-300 w-[500px] h-auto flex flex-col items-start gap-5 p-5 my-10">
+
+      {loading ?
+      
+      
+      <div className='w-full h-full flex flex-col items-center justify-center '><ScaleLoader width={4} height={50} color="black" loading={loading} size={400} /> <h1 className='text-slate-700 font-poppins'>Loading...</h1></div> :
+      
+      
+      <div className='w-full h-dvh flex flex-row items-center justify-evenly my-10'><form onSubmit={(e) =>updateEvent(e)} className="rounded-lg font-poppins border-2 border-slate-300 hover:shadow-md hover:shadow-blue-300 w-[500px] h-auto flex flex-col items-start gap-5 p-5 my-10">
         <h1 className="text-2xl font-merriweather font-semibold text-center text-slate-600 mb-10 w-full">
           Update Event
         </h1>
@@ -218,6 +232,7 @@ const updateEvent = async(e) =>{
           </label>
           <input
             type="date"
+            min={min_date}
             value={previousData.eventTime}
             onChange={(e) =>
               setPreviousData({ ...previousData, eventTime: e.target.value })
@@ -316,7 +331,8 @@ const updateEvent = async(e) =>{
       </div>
 
           <ToastContainer />
-    </div>
+</div>}
+          </div>
   );
 };
 

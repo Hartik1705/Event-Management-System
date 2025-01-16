@@ -2,6 +2,11 @@ import eventModel from "../model/eventModel.js";
 import participantModel from "../model/participantModel.js";
 import userModel from "../model/userModel.js";
 import sendEventEmail from "../utils/email.js";
+import csvParser from 'csv-parser';
+import fs, { readdirSync } from 'fs';
+import path from "path";
+import { dirname } from "path";
+import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 
 
 //CREATE EVENT
@@ -48,7 +53,7 @@ const createEvent = async(req,res) =>{
 
         await participantsForEvent.save();
 
-        await sendEventEmail(user.email,invitedPeople, formData);
+        await sendEventEmail(invitedPeople, formData);
 
         // console.log(emailSent);
 
@@ -98,30 +103,40 @@ const updateEvent = async(req,res) =>{
             
     const userID = req._id;
 
-    const {eventID, eventName, description, eventTime, invitedParticipants} = req.body;
+    const {id} = req.params;
+    console.log("eventId", id);
+    const {eventName, description, eventTime, invitedParticipants} = req.body;
 
-    let event = await eventModel.findOne({_id : eventID, createdBy : userID});
+    let event = await eventModel.findOne({_id : id, createdBy : userID});
+        console.log("Event...",event);
+    const participantsInEvent = await participantModel.findOne({invitedEvent : id}).populate("invitedEvent");
 
-    const participantsInEvent = await participantModel.findOne({invitedEvent : eventID}).populate("invitedEvent");
+
+    event.eventName = eventName || '';
+
+    console.log("event Name....", event.eventName);
+    event.description = description || '';
+    event.eventTime = eventTime || '';
 
 
-    event.eventName = eventName;
-    event.description = description;
-    event.eventTime = eventTime;
 
      participantsInEvent.email = invitedParticipants;
 
 
     await event.save();
 
+    console.log(event);
+
     await participantsInEvent.save();
 
-    const formData = {
+    const eventData = {
         eventName,
         description,
         eventTime
     }
-    await sendEventEmail(invitedParticipants, formData );
+
+    // console.log("This is mail");
+    await sendEventEmail(invitedParticipants, eventData);
 
     return res.json({success : true, updatedEvent : event, participantsInEvent});
     }
@@ -214,10 +229,92 @@ const getParticularEvent = async(req,res) =>{
 }
 
 
+//Fetching user emails from CSV file
+
+const fetchEmails = async(req,res) =>{
+
+    try{
+
+        // console.log(req.file);
+
+        const path = req.file.path;
+        // console.log("path", path);
+
+        let result = [];
+
+        fs.createReadStream(path)
+        .pipe(csvParser())
+        .on("data",(data) =>{
+            let emails = Object.values(data);
+           emails.forEach((e) => result.push(e));
+
+        })
+        .on("end",() =>{    
+     
+            return res.json({success : true, emails : result });
+        })
+        .on("error",(err) =>{
+            console.log(err);
+        })
+
+    }
+
+    catch(error){
+        return res.json({success : false, message : error.message});
+    }
+
+}
+
+
+
+//exporting participants
+
+const exportParticipant = async(req,res) =>{
+
+    try{
+
+        const {id} = req.params;
+
+        const participants = await participantModel.findOne({invitedEvent : id}).select('email -_id');
+        
+        const emails = participants.email;
+
+
+        //writing in file 
+        const csvWriter = createCsvWriter({
+            path : './uploads/participants.csv',
+            header : [
+                {id : 'email', title : 'Email'}
+            ]
+        })
+
+        let result = [];
+
+        emails.forEach((e) => {
+            result.push({email : e})
+        })
+
+        await csvWriter.writeRecords(result);
+        
+        //file path
+        // res.redirect('http://localhost:3000/file/participants.csv')
+
+        // return res.json({success : true});
+        // res.redirect('http://localhost:3000/file/participants.csv',);
+
+     
+        return res.json({success : true, url : 'http://localhost:3000/file/participants.csv'});
+
+    }
+
+    catch(error){
+        return res.json({success : false, message : error.message});
+    }
+
+}
 
 
 
 
 
-
-export {createEvent, deleteEvent, getEvents, getParticularEvent, getPreviousEvents, updateEvent};
+export {createEvent, deleteEvent, getEvents, getParticularEvent, getPreviousEvents, updateEvent, fetchEmails, exportParticipant};

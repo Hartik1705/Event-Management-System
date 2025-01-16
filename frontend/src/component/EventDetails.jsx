@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
-import { redirect, useNavigate, useParams } from 'react-router-dom';
+import {redirect, useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
+import IosShareIcon from '@mui/icons-material/IosShare';
 
 
 const EventDetails = () => {
@@ -12,7 +13,7 @@ const EventDetails = () => {
     // console.log(id);
     const [eve, setEvent] = useState({});
     const [people, setPeople] = useState([]);
-
+    
     const [isDel, setIsDeleted] = useState(false);
 
     const navigate = useNavigate();
@@ -71,6 +72,28 @@ const EventDetails = () => {
     }
 
 
+    //exporting Participants
+    const exportParticipants = async() =>{
+
+        try{
+            // const token = localStorage.getItem('token');
+            const response = await axios.post(`http://localhost:3000/event/exportParticipant/${id}`)
+
+            console.log(response.data);
+            const {success,url} = response.data;
+
+            if(success){
+                window.location.href=url;
+            }
+
+        }
+
+        catch(error){
+            toast.error(error);
+        }
+
+    }
+
 
     useEffect(() => {
         getEvent();
@@ -114,6 +137,12 @@ const EventDetails = () => {
                         ))}
                     </div>
                 </div>
+
+
+
+
+
+
             </div>
 
             {/* Action Buttons */}
@@ -123,13 +152,23 @@ const EventDetails = () => {
                         onClick={deleteEvent}
                         className="border-2 border-red-600 text-red-600 hover:text-white hover:bg-red-600 px-6 py-2 font-medium rounded-lg flex flex-row  transition duration-300"
                     >
-                        <DeleteIcon className='mx-1'/>Delete Event
+                        <DeleteIcon className='mx-1' />Delete Event
                     </button>
 
-                    <button className=' border-2 border-blue-600 text-blue-700 hover:bg-blue-600  hover:text-white p-2 w-full mt-5 rounded-lg font-poppins transition duration-300' onClick={() => navigate(`/updateEvent/${id}`)} ><UpgradeIcon fontSize='medium'/>Update Event</button>
-                    </div>
+                    <button className=' border-2 border-blue-600 text-blue-700 hover:bg-blue-600  hover:text-white p-2 w-full mt-5 rounded-lg font-poppins transition duration-300' onClick={() => navigate(`/updateEvent/${id}`)} ><UpgradeIcon fontSize='medium' />Update Event</button>
+                </div>
                 )}
             </div>
+
+
+            {/*export participants to .csv file */}
+            <button
+
+                onClick={exportParticipants}
+                className='border-2 flex flex-row items-center justify-center gap-2  border-blue-600 text-slate-600 p-3 font-poppins hover:shoadow-xl hover:bg-blue-600 hover:text-white hover:transition hover:-translate-y-2 hover:delay-100 hover:ease-in-out'>
+                <IosShareIcon />Export Participants
+            </button>
+
             <ToastContainer />
         </div>
     )

@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 
+
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -13,16 +14,18 @@ const transporter = nodemailer.createTransport({
     },
   });
 
-//   console.log(transporter);
+  // console.log("Transportor", transporter);
 
-const sendEventEmail = async (senderEmail,recipientEmails, eventData) => {
+const sendEventEmail = async (recipientEmails, eventData) => {
+  // console.log(eventData);
     const { eventName, description, eventTime } = eventData;
   
     const mailOptions = {
-      from: senderEmail,
+      from: "luharhartik2002@gmail.com",
       to: recipientEmails,
       subject: `Invitation to ${eventName}`,
-      html: `
+      html: 
+      `
         <h1>${eventName}</h1>
         <p>${description}</p>
         <p><strong>Date:</strong> ${eventTime}</p>

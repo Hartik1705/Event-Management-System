@@ -40,6 +40,10 @@ const Login = () => {
             if (success) {
                 login(token, name);
                 navigate('/home');
+
+                setTimeout(() =>{
+                    toast.success('Welcome!');
+                },100)
             }
             else {
                 toast.error(message);

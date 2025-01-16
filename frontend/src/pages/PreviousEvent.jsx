@@ -20,19 +20,19 @@ const PreviousEvents = () => {
       })
 
       console.log(response.data);
-  
-      const {success } = response.data;
 
-      if(success){
+      const { success } = response.data;
+
+      if (success) {
         setDelEvent(response.data.events);
 
       }
-      else{
-        if(response.data.message === "jwt expired"){
+      else {
+        if (response.data.message === "jwt expired") {
           toast.info("Token Expired, Redirecting to Login Page");
-          setTimeout(() =>{
+          setTimeout(() => {
             navigate('/');
-          },4000)
+          }, 4000)
         }
       }
 
@@ -46,7 +46,7 @@ const PreviousEvents = () => {
     getDelEvents();
   }, [])
 
-  useEffect(() =>{
+  useEffect(() => {
 
   }, [delEvent])
 
@@ -69,10 +69,15 @@ const PreviousEvents = () => {
             createdAt={eve.createdAt}
           />
         ))}
-      </div>) : (<div className='w-full h-auto  flex flex-col justify-center items-center'>
+
+
+      </div>)
+      
+      : (<div className='w-full h-auto  flex flex-col justify-center items-center'>
         <p className='text-2xl my-10 text-slate-400 font-poppins'>No Events yet &#128533;</p>
-         </div>)}
-        <ToastContainer />
+      </div>)}
+      <ToastContainer />
+
     </div>
 
   )
